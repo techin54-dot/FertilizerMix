@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#061b16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Smart Fertilizer Mix - ระบบผสมปุ๋ยใช้เอง</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { prompt: ['Prompt', 'sans-serif'] },
+          boxShadow: {
+            glow: '0 0 28px rgba(16,185,129,.22)',
+            card: '0 18px 48px rgba(2,6,23,.10)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root{
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+      --safe-right: env(safe-area-inset-right);
+      --dark:#061b16;
+      --green:#10b981;
+      --lime:#a3e635;
+      --ink:#0f172a;
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{
+      min-height:100dvh;
+      margin:0;
+      overflow-x:hidden;
+      font-family:'Prompt',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(16,185,129,.22), transparent 34rem),
+        radial-gradient(circle at 90% 15%, rgba(163,230,53,.12), transparent 30rem),
+        linear-gradient(180deg,#f6fbf8 0%,#edf6f1 100%);
+    }
+
+    button,input,textarea,select{font-family:inherit;font-size:16px}
+    button{min-height:44px;touch-action:manipulation;border:0;cursor:pointer}
+    input,textarea,select{-webkit-appearance:none;appearance:none}
+
+    .app-shell{min-height:100dvh;padding-left:var(--safe-left);padding-right:var(--safe-right)}
+    .topbar{position:sticky;top:0;z-index:40;padding-top:var(--safe-top);background:rgba(6,27,22,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
+    .tech-bg{background:linear-gradient(135deg,rgba(6,27,22,.98),rgba(9,55,43,.96));position:relative;overflow:hidden}
+    .tech-bg::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);background-size:28px 28px;mask-image:linear-gradient(180deg,#000,transparent 85%);pointer-events:none}
+    .glass{background:rgba(255,255,255,.86);border:1px solid rgba(219,231,225,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 48px rgba(2,6,23,.08)}
+    .dark-glass{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+    .soft-card{background:#fff;border:1px solid rgba(219,231,225,.9);box-shadow:0 14px 34px rgba(2,6,23,.06)}
+    .field{width:100%;min-height:48px;border:1px solid #dbe7e1;border-radius:18px;background:#fff;padding:.78rem .95rem;outline:none;transition:.18s ease}
+    .field:focus{border-color:#10b981;box-shadow:0 0 0 4px rgba(16,185,129,.14)}
+    .nav-btn{color:rgba(255,255,255,.72);border:1px solid transparent;background:transparent}
+    .nav-btn.active{color:#062018;background:linear-gradient(135deg,#a7f3d0,#34d399);border-color:rgba(255,255,255,.25);box-shadow:0 12px 30px rgba(16,185,129,.28)}
+    .bottom-nav{position:fixed;z-index:50;display:none;left:calc(10px + var(--safe-left));right:calc(10px + var(--safe-right));bottom:calc(10px + var(--safe-bottom));height:74px;border-radius:28px;padding:8px;gap:4px;background:rgba(6,27,22,.92);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 46px rgba(2,6,23,.36);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .bottom-nav button{flex:1;min-width:0;border-radius:21px;color:#cbd5e1;background:transparent;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+    .bottom-nav button i{font-size:18px}.bottom-nav button.active{background:#10b981;color:#052018}
+    .page{display:none;animation:fadeIn .22s ease}.page.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .chip{border:1px solid #dbe7e1;border-radius:16px;background:#fff;padding:.7rem .8rem;display:flex;gap:.65rem;align-items:center;cursor:pointer;transition:.18s ease}
+    .chip.checked{border-color:#10b981;background:#ecfdf5;box-shadow:0 10px 24px rgba(16,185,129,.14)}
+    .toast{position:fixed;left:50%;top:calc(14px + var(--safe-top));transform:translateX(-50%) translateY(-10px);opacity:0;z-index:100;pointer-events:none;transition:.24s ease;max-width:min(92vw,520px);border-radius:18px;padding:12px 16px;color:#fff;font-weight:700;box-shadow:0 18px 44px rgba(2,6,23,.32)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .modal-backdrop-custom{position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:80;display:none;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--safe-bottom))}
+    .modal-backdrop-custom.show{display:flex}
+    .modal-panel{width:min(94vw,560px);max-height:90dvh;overflow:auto;border-radius:28px;background:#fff;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    .print-only{display:none}
+
+    @media(max-width:1023px){.desktop-nav{display:none!important}.bottom-nav{display:flex}.content-wrap{padding-bottom:calc(96px + var(--safe-bottom))}}
+    @media(max-width:640px){.hero-title{font-size:1.55rem}.hero-stat{font-size:1.85rem}.modal-backdrop-custom{align-items:flex-end;padding-left:10px;padding-right:10px}.modal-panel{border-radius:26px 26px 18px 18px}}
+    @media(print){.topbar,.bottom-nav,.no-print{display:none!important}body{background:#fff}.soft-card,.glass{box-shadow:none!important;border:1px solid #ddd}.print-only{display:block}.page{display:block!important}}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast bg-emerald-600">ข้อความแจ้งเตือน</div>
+
+  <div class="app-shell">
+    <header class="topbar text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-400 text-emerald-950 flex items-center justify-center shadow-glow shrink-0"><i class="fa-solid fa-flask-vial text-xl"></i></div>
+          <div class="min-w-0">
+            <h1 class="font-extrabold leading-tight truncate">Smart Fertilizer Mix</h1>
+            <p class="text-[11px] text-emerald-100/70 truncate">ระบบผสมปุ๋ยใช้เอง • GitHub / LINE Ready</p>
+          </div>
+        </div>
+        <nav class="desktop-nav flex items-center gap-2 text-sm font-bold">
+          <button data-page="dashboard" class="nav-btn active px-4 py-2 rounded-2xl"><i class="fa-solid fa-house mr-1"></i> หน้าแรก</button>
+          <button data-page="calculator" class="nav-btn px-4 py-2 rounded-2xl"><i class="fa-solid fa-calculator mr-1"></i> คำนวณ</button>
+          <button data-page="fertilizer" class="nav-btn px-4 py-2 rounded-2xl"><i class="fa-solid fa-boxes-stacked mr-1"></i> แม่ปุ๋ย</button>
+          <button data-page="history" class="nav-btn px-4 py-2 rounded-2xl"><i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติ</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="content-wrap max-w-7xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+      <section id="page-dashboard" class="page active space-y-6">
+        <div class="tech-bg rounded-[2rem] p-5 sm:p-8 text-white shadow-card">
+          <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7">
+              <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs font-bold mb-4"><i class="fa-solid fa-satellite-dish text-lime-300"></i> Smart Hi-Technology Fertilizer Calculator</span>
+              <h2 class="hero-title text-3xl sm:text-4xl font-extrabold leading-tight">ระบบคำนวณผสมปุ๋ยใช้เอง<br><span class="text-emerald-300">ลดต้นทุน คุมสูตรได้ แม่นยำขึ้น</span></h2>
+              <p class="text-emerald-50/80 mt-3 leading-relaxed">เลือกแม่ปุ๋ย กำหนดสูตร N-P-K และน้ำหนักรวม ระบบจะคำนวณสัดส่วนผสม พร้อมต้นทุน ประวัติ และฐานข้อมูลแม่ปุ๋ยแบบบันทึกในเครื่อง เหมาะสำหรับเปิดผ่าน LINE และอัปโหลดขึ้น GitHub Pages</p>
+              <div class="flex flex-wrap gap-3 mt-6 no-print">
+                <button data-action="go-calculator" class="bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-extrabold px-5 py-3 rounded-2xl shadow-glow"><i class="fa-solid fa-calculator mr-2"></i> เริ่มคำนวณ</button>
+                <button data-action="go-fertilizer" class="dark-glass hover:bg-white/15 text-white font-bold px-5 py-3 rounded-2xl"><i class="fa-solid fa-database mr-2"></i> จัดการแม่ปุ๋ย</button>
+              </div>
+            </div>
+            <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+              <div class="dark-glass rounded-3xl p-4"><p class="text-xs text-emerald-100/70">จำนวนแม่ปุ๋ย</p><strong id="dash-fert-count" class="hero-stat text-3xl font-extrabold text-emerald-300">0</strong><p class="text-[11px] text-white/50">รายการ</p></div>
+              <div class="dark-glass rounded-3xl p-4"><p class="text-xs text-emerald-100/70">ประวัติ</p><strong id="dash-history-count" class="hero-stat text-3xl font-extrabold text-lime-300">0</strong><p class="text-[11px] text-white/50">ครั้ง</p></div>
+              <div class="dark-glass rounded-3xl p-4 col-span-2"><p class="text-xs text-emerald-100/70">สูตรล่าสุด</p><strong id="dash-last-formula" class="text-2xl font-extrabold text-white">ยังไม่มีข้อมูล</strong><p id="dash-last-cost" class="text-[12px] text-emerald-100/70 mt-1">คำนวณแล้วจะแสดงตรงนี้</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button data-action="go-calculator" class="soft-card rounded-3xl p-5 text-left hover:-translate-y-1 transition"><div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4"><i class="fa-solid fa-calculator text-xl"></i></div><h3 class="font-extrabold text-lg">คำนวณสูตรปุ๋ย</h3><p class="text-sm text-slate-500 mt-1">กำหนด N-P-K และน้ำหนักรวม</p></button>
+          <button data-action="go-fertilizer" class="soft-card rounded-3xl p-5 text-left hover:-translate-y-1 transition"><div class="w-12 h-12 rounded-2xl bg-lime-100 text-lime-700 flex items-center justify-center mb-4"><i class="fa-solid fa-boxes-stacked text-xl"></i></div><h3 class="font-extrabold text-lg">ฐานข้อมูลแม่ปุ๋ย</h3><p class="text-sm text-slate-500 mt-1">เพิ่ม ลบ หรือแก้ไขราคาแม่ปุ๋ย</p></button>
+          <button data-action="go-history" class="soft-card rounded-3xl p-5 text-left hover:-translate-y-1 transition"><div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div><h3 class="font-extrabold text-lg">ประวัติการคำนวณ</h3><p class="text-sm text-slate-500 mt-1">บันทึกสูตรและต้นทุนย้อนหลัง</p></button>
+        </div>
+      </section>
+
+      <section id="page-calculator" class="page space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="lg:col-span-5 soft-card rounded-[2rem] p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-3 mb-5">
+              <div><h2 class="text-xl font-extrabold text-emerald-800"><i class="fa-solid fa-microchip mr-2"></i> กำหนดเป้าหมาย</h2><p class="text-sm text-slate-500">กรอกสูตรและเลือกแม่ปุ๋ยที่ต้องการใช้</p></div>
+              <button id="reset-calculator" class="no-print w-11 h-11 rounded-2xl bg-slate-100 text-slate-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+
+            <label class="block text-sm font-bold text-slate-600 mb-2">สูตรที่ต้องการ (N - P - K)</label>
+            <div class="grid grid-cols-3 gap-2 mb-4">
+              <div><input id="calc-n" type="number" inputmode="decimal" min="0" max="100" value="15" class="field text-center font-extrabold text-lg"><span class="block text-center text-xs text-slate-400 mt-1">N</span></div>
+              <div><input id="calc-p" type="number" inputmode="decimal" min="0" max="100" value="15" class="field text-center font-extrabold text-lg"><span class="block text-center text-xs text-slate-400 mt-1">P</span></div>
+              <div><input id="calc-k" type="number" inputmode="decimal" min="0" max="100" value="15" class="field text-center font-extrabold text-lg"><span class="block text-center text-xs text-slate-400 mt-1">K</span></div>
+            </div>
+
+            <label class="block text-sm font-bold text-slate-600 mb-2">น้ำหนักรวมที่ต้องการผสม (กิโลกรัม)</label>
+            <input id="calc-weight" type="number" inputmode="decimal" min="1" value="100" class="field mb-4 font-bold">
+
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-bold text-slate-600">เลือกแม่ปุ๋ย</label>
+              <button id="select-all-fert" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">เลือกทั้งหมด</button>
+            </div>
+            <div id="calc-checkboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[310px] overflow-y-auto no-scrollbar pr-1"></div>
+
+            <button id="run-calculation" class="w-full mt-5 bg-gradient-to-r from-emerald-500 to-lime-400 hover:from-emerald-400 hover:to-lime-300 text-emerald-950 font-extrabold py-3.5 rounded-2xl shadow-glow"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> เริ่มคำนวณสูตร</button>
+          </div>
+
+          <div class="lg:col-span-7 soft-card rounded-[2rem] p-5 sm:p-6 min-h-[520px]">
+            <div class="flex items-center justify-between gap-3 mb-5">
+              <div><h2 class="text-xl font-extrabold text-emerald-800"><i class="fa-solid fa-chart-pie mr-2"></i> ผลการคำนวณ</h2><p class="text-sm text-slate-500">ระบบจะแนะนำสัดส่วนที่ใกล้สูตรเป้าหมายที่สุด</p></div>
+              <button id="share-current" class="no-print w-11 h-11 rounded-2xl bg-slate-100 text-slate-600"><i class="fa-solid fa-share-nodes"></i></button>
+            </div>
+            <div id="calc-result-area" class="h-full flex items-center justify-center text-center text-slate-400 py-14">
+              <div><i class="fa-solid fa-flask text-5xl text-emerald-200 mb-4"></i><p class="font-bold">กรอกข้อมูลแล้วกดเริ่มคำนวณสูตร</p><p class="text-sm mt-1">ผลลัพธ์จะแสดงปริมาณวัตถุดิบ ต้นทุน และสูตรจริง</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-fertilizer" class="page space-y-5">
+        <div class="soft-card rounded-[2rem] p-5 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div><h2 class="text-xl font-extrabold text-emerald-800"><i class="fa-solid fa-database mr-2"></i> ฐานข้อมูลแม่ปุ๋ย</h2><p class="text-sm text-slate-500">ข้อมูลบันทึกในเครื่องผู้ใช้ด้วย LocalStorage เหมาะสำหรับ GitHub Pages</p></div>
+            <div class="flex gap-2 no-print"><button id="open-add-fert" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-2xl"><i class="fa-solid fa-plus mr-1"></i> เพิ่มแม่ปุ๋ย</button><button id="restore-defaults" class="bg-slate-100 text-slate-700 font-bold px-4 py-2 rounded-2xl"><i class="fa-solid fa-seedling mr-1"></i> ค่าเริ่มต้น</button></div>
+          </div>
+          <div id="fert-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page space-y-5">
+        <div class="soft-card rounded-[2rem] p-5 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div><h2 class="text-xl font-extrabold text-emerald-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการคำนวณ</h2><p class="text-sm text-slate-500">บันทึกสูตรที่คำนวณไว้ในเครื่อง</p></div>
+            <button id="clear-history" class="no-print bg-red-50 text-red-600 font-bold px-4 py-2 rounded-2xl"><i class="fa-solid fa-trash mr-1"></i> ล้างประวัติ</button>
+          </div>
+          <div id="history-list" class="space-y-3"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav lg:hidden no-print">
+    <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>หน้าแรก</span></button>
+    <button data-page="calculator"><i class="fa-solid fa-calculator"></i><span>คำนวณ</span></button>
+    <button data-page="fertilizer"><i class="fa-solid fa-boxes-stacked"></i><span>แม่ปุ๋ย</span></button>
+    <button data-page="history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></button>
+  </nav>
+
+  <div id="fert-modal" class="modal-backdrop-custom no-print">
+    <div class="modal-panel">
+      <div class="tech-bg text-white p-5 relative">
+        <div class="relative z-10 flex items-center justify-between gap-3">
+          <div><h3 id="modal-title" class="text-xl font-extrabold">เพิ่มแม่ปุ๋ยใหม่</h3><p class="text-sm text-emerald-50/70">ระบุธาตุอาหารและราคา/กก.</p></div>
+          <button id="close-fert-modal" class="w-11 h-11 rounded-2xl bg-white/10"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="p-5 space-y-4">
+        <input type="hidden" id="fert-edit-id">
+        <div><label class="text-sm font-bold text-slate-600 mb-1 block">ชื่อแม่ปุ๋ย</label><input id="m-name" class="field" placeholder="เช่น ยูเรีย 46-0-0"></div>
+        <div class="grid grid-cols-3 gap-2">
+          <div><label class="text-sm font-bold text-slate-600 mb-1 block">N</label><input id="m-n" type="number" inputmode="decimal" value="0" class="field text-center font-bold"></div>
+          <div><label class="text-sm font-bold text-slate-600 mb-1 block">P</label><input id="m-p" type="number" inputmode="decimal" value="0" class="field text-center font-bold"></div>
+          <div><label class="text-sm font-bold text-slate-600 mb-1 block">K</label><input id="m-k" type="number" inputmode="decimal" value="0" class="field text-center font-bold"></div>
+        </div>
+        <div><label class="text-sm font-bold text-slate-600 mb-1 block">ราคา (บาท/กก.)</label><input id="m-price" type="number" inputmode="decimal" value="0" class="field"></div>
+        <button id="save-fert-modal" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-2xl"><i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const STORAGE_FERT = 'smart_fert_mix_fertilizers_v2';
+    const STORAGE_HISTORY = 'smart_fert_mix_history_v2';
+
+    let fertilizers = [];
+    let historyLogs = [];
+    let cacheResult = null;
+    let currentPage = 'dashboard';
+
+    const defaultFertilizers = [
+      makeFertilizer('ยูเรีย', 46, 0, 0, 18),
+      makeFertilizer('DAP', 18, 46, 0, 25),
+      makeFertilizer('MOP / โพแทสเซียมคลอไรด์', 0, 0, 60, 22),
+      makeFertilizer('แอมโมเนียมซัลเฟต', 21, 0, 0, 12),
+      makeFertilizer('TSP', 0, 46, 0, 23),
+      makeFertilizer('MAP', 12, 61, 0, 28)
+    ];
+
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    function initApp(){
+      fertilizers = loadJSON(STORAGE_FERT, null) || cloneData(defaultFertilizers);
+      historyLogs = loadJSON(STORAGE_HISTORY, []);
+      saveJSON(STORAGE_FERT, fertilizers);
+      bindEvents();
+      renderAll();
+      showPage('dashboard', false);
+      runSelfTests();
+    }
+
+    function bindEvents(){
+      document.querySelectorAll('[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => showPage(btn.dataset.page));
+      });
+      document.querySelectorAll('[data-action="go-calculator"]').forEach(btn => btn.addEventListener('click', () => showPage('calculator')));
+      document.querySelectorAll('[data-action="go-fertilizer"]').forEach(btn => btn.addEventListener('click', () => showPage('fertilizer')));
+      document.querySelectorAll('[data-action="go-history"]').forEach(btn => btn.addEventListener('click', () => showPage('history')));
+
+      document.getElementById('reset-calculator')?.addEventListener('click', resetCalculator);
+      document.getElementById('select-all-fert')?.addEventListener('click', () => toggleAllFertilizers(true));
+      document.getElementById('run-calculation')?.addEventListener('click', runCalculation);
+      document.getElementById('share-current')?.addEventListener('click', shareCurrentResult);
+      document.getElementById('open-add-fert')?.addEventListener('click', () => openFertModal());
+      document.getElementById('restore-defaults')?.addEventListener('click', restoreDefaults);
+      document.getElementById('clear-history')?.addEventListener('click', clearHistory);
+      document.getElementById('close-fert-modal')?.addEventListener('click', closeFertModal);
+      document.getElementById('save-fert-modal')?.addEventListener('click', saveFertilizerFromModal);
+      document.getElementById('fert-modal')?.addEventListener('click', event => {
+        if(event.target.id === 'fert-modal') closeFertModal();
+      });
+    }
+
+    function showPage(page, animate = true){
+      currentPage = page;
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      document.getElementById('page-' + page)?.classList.add('active');
+      document.querySelectorAll('[data-page]').forEach(btn => btn.classList.toggle('active', btn.dataset.page === page));
+      if(page === 'calculator') renderCalculatorFertilizers();
+      if(page === 'fertilizer') renderFertilizerList();
+      if(page === 'history') renderHistory();
+      if(animate) window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    window.showPage = showPage;
+
+    function renderAll(){
+      renderDashboard();
+      renderCalculatorFertilizers();
+      renderFertilizerList();
+      renderHistory();
+    }
+
+    function renderDashboard(){
+      setText('dash-fert-count', fertilizers.length);
+      setText('dash-history-count', historyLogs.length);
+      const last = historyLogs[0];
+      setText('dash-last-formula', last ? last.targetNPK : 'ยังไม่มีข้อมูล');
+      setText('dash-last-cost', last ? `น้ำหนัก ${num(last.totalWeight)} กก. • ต้นทุนรวม ${money(last.totalCost)} บาท` : 'คำนวณแล้วจะแสดงตรงนี้');
+    }
+
+    function renderCalculatorFertilizers(){
+      const box = document.getElementById('calc-checkboxes');
+      if(!box) return;
+      if(!fertilizers.length){
+        box.innerHTML = '<div class="text-center text-slate-400 bg-slate-50 rounded-2xl p-5">ยังไม่มีข้อมูลแม่ปุ๋ย</div>';
+        return;
+      }
+      box.innerHTML = fertilizers.map(f => `
+        <label class="chip checked">
+          <input class="fert-check accent-emerald-600" type="checkbox" value="${escapeAttr(f.id)}" checked>
+          <span class="flex-1 min-w-0">
+            <strong class="block truncate">${escapeHTML(f.name)}</strong>
+            <small class="text-slate-500">${num(f.n)}-${num(f.p)}-${num(f.k)} • ${money(f.price)} บ./กก.</small>
+          </span>
+        </label>
+      `).join('');
+      box.querySelectorAll('.fert-check').forEach(cb => {
+        cb.addEventListener('change', () => cb.closest('.chip')?.classList.toggle('checked', cb.checked));
+      });
+    }
+
+    function renderFertilizerList(){
+      const list = document.getElementById('fert-list');
+      if(!list) return;
+      if(!fertilizers.length){
+        list.innerHTML = '<div class="col-span-full text-center text-slate-400 bg-slate-50 rounded-3xl p-8">ยังไม่มีข้อมูลแม่ปุ๋ย</div>';
+        return;
+      }
+      list.innerHTML = fertilizers.map(f => `
+        <div class="glass rounded-3xl p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="font-extrabold text-slate-900 truncate">${escapeHTML(f.name)}</h3>
+              <p class="text-sm text-slate-500">ราคา ${money(f.price)} บาท/กก.</p>
+            </div>
+            <div class="flex gap-1 no-print">
+              <button data-edit-fert="${escapeAttr(f.id)}" class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-600"><i class="fa-solid fa-pen"></i></button>
+              <button data-delete-fert="${escapeAttr(f.id)}" class="w-10 h-10 rounded-2xl bg-red-50 text-red-600"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+            <div class="bg-emerald-50 rounded-2xl p-3"><span class="text-xs text-emerald-700 font-bold">N</span><strong class="block text-xl">${num(f.n)}</strong></div>
+            <div class="bg-lime-50 rounded-2xl p-3"><span class="text-xs text-lime-700 font-bold">P</span><strong class="block text-xl">${num(f.p)}</strong></div>
+            <div class="bg-sky-50 rounded-2xl p-3"><span class="text-xs text-sky-700 font-bold">K</span><strong class="block text-xl">${num(f.k)}</strong></div>
+          </div>
+        </div>
+      `).join('');
+      list.querySelectorAll('[data-edit-fert]').forEach(btn => btn.addEventListener('click', () => openFertModal(btn.dataset.editFert)));
+      list.querySelectorAll('[data-delete-fert]').forEach(btn => btn.addEventListener('click', () => deleteFertilizer(btn.dataset.deleteFert)));
+    }
+
+    function renderHistory(){
+      const list = document.getElementById('history-list');
+      if(!list) return;
+      if(!historyLogs.length){
+        list.innerHTML = '<div class="text-center text-slate-400 bg-slate-50 rounded-3xl p-10"><i class="fa-solid fa-clock-rotate-left text-4xl text-slate-300 mb-3"></i><p class="font-bold">ยังไม่มีประวัติการคำนวณ</p></div>';
+        return;
+      }
+      list.innerHTML = historyLogs.map(h => `
+        <div class="glass rounded-3xl p-4">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div>
+              <div class="text-xs text-slate-400">${new Date(h.createdAt).toLocaleString('th-TH')}</div>
+              <h3 class="text-xl font-extrabold text-emerald-800">สูตร ${escapeHTML(h.targetNPK)} • ${num(h.totalWeight)} กก.</h3>
+              <p class="text-sm text-slate-500 mt-1">สูตรจริง ${escapeHTML(h.realNPK)} • ต้นทุน ${money(h.totalCost)} บาท • ${money(h.costPerKg)} บาท/กก.</p>
+            </div>
+            <div class="flex gap-2 no-print">
+              <button data-share-history="${escapeAttr(h.id)}" class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600"><i class="fa-solid fa-share-nodes"></i></button>
+              <button data-delete-history="${escapeAttr(h.id)}" class="w-11 h-11 rounded-2xl bg-red-50 text-red-600"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            ${h.items.map(i => `<div class="bg-white rounded-2xl border border-slate-100 p-3 text-sm"><strong>${escapeHTML(i.name)}</strong><br><span class="text-emerald-700 font-bold">${num(i.weight)} กก.</span></div>`).join('')}
+            ${h.filler > 0 ? `<div class="bg-slate-50 rounded-2xl border border-slate-100 p-3 text-sm"><strong>สารเติมเต็ม</strong><br><span class="text-slate-600 font-bold">${num(h.filler)} กก.</span></div>` : ''}
+          </div>
+        </div>
+      `).join('');
+      list.querySelectorAll('[data-share-history]').forEach(btn => btn.addEventListener('click', () => shareHistory(btn.dataset.shareHistory)));
+      list.querySelectorAll('[data-delete-history]').forEach(btn => btn.addEventListener('click', () => deleteHistory(btn.dataset.deleteHistory)));
+    }
+
+    function runCalculation(){
+      const targetN = safeNumber(document.getElementById('calc-n')?.value);
+      const targetP = safeNumber(document.getElementById('calc-p')?.value);
+      const targetK = safeNumber(document.getElementById('calc-k')?.value);
+      const totalWeight = safeNumber(document.getElementById('calc-weight')?.value);
+      const selectedIds = Array.from(document.querySelectorAll('.fert-check:checked')).map(cb => cb.value);
+      const selected = fertilizers.filter(f => selectedIds.includes(f.id));
+
+      if(targetN < 0 || targetP < 0 || targetK < 0 || totalWeight <= 0) return toast('กรุณากรอกสูตรและน้ำหนักให้ถูกต้อง','error');
+      if(!selected.length) return toast('กรุณาเลือกแม่ปุ๋ยอย่างน้อย 1 รายการ','error');
+      if(targetN + targetP + targetK <= 0) return toast('กรุณาระบุค่า N-P-K มากกว่า 0','error');
+
+      const result = calculateBestMix(targetN,targetP,targetK,totalWeight,selected);
+      if(!result){
+        cacheResult = null;
+        document.getElementById('calc-result-area').innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-triangle-exclamation text-5xl text-amber-300 mb-4"></i><p class="font-extrabold text-slate-700">ไม่พบสัดส่วนที่เหมาะสม</p><p class="text-sm text-slate-500 mt-1">ลองเลือกแม่ปุ๋ยเพิ่ม หรือปรับสูตรเป้าหมายให้เหมาะสม</p></div>';
+        return;
+      }
+      cacheResult = result;
+      renderCalculationResult(result);
+      toast('คำนวณสูตรสำเร็จ');
+    }
+
+    function calculateBestMix(targetN,targetP,targetK,totalWeight,selected){
+      const b = [totalWeight*targetN/100, totalWeight*targetP/100, totalWeight*targetK/100];
+      let best = null;
+      const subsets = buildSubsets(selected, Math.min(3, selected.length));
+      subsets.forEach(sub => {
+        const solution = solveLeastSquares(sub, b);
+        if(!solution) return;
+        const weights = solution.map(v => v < 1e-6 ? 0 : v);
+        const sum = weights.reduce((a,c) => a+c,0);
+        if(weights.some(w => !Number.isFinite(w) || w < -0.0001) || sum > totalWeight + 0.01) return;
+        const achieved = [0,0,0];
+        let totalCost = 0;
+        const items = sub.map((f,i) => {
+          const w = weights[i];
+          achieved[0] += w*f.n/100;
+          achieved[1] += w*f.p/100;
+          achieved[2] += w*f.k/100;
+          totalCost += w*f.price;
+          return {...f, weight:w, cost:w*f.price};
+        }).filter(i => i.weight > 0.01);
+        if(!items.length) return;
+        const real = achieved.map(v => v/totalWeight*100);
+        const absError = Math.abs(real[0]-targetN)+Math.abs(real[1]-targetP)+Math.abs(real[2]-targetK);
+        const maxError = Math.max(Math.abs(real[0]-targetN),Math.abs(real[1]-targetP),Math.abs(real[2]-targetK));
+        const filler = Math.max(0,totalWeight-sum);
+        const score = absError*10000 + totalCost*0.01 + items.length*0.03;
+        const candidate = {id:uid(), createdAt:new Date().toISOString(), targetNPK:`${num(targetN)}-${num(targetP)}-${num(targetK)}`, realNPK:`${num(real[0])}-${num(real[1])}-${num(real[2])}`, totalWeight, items, filler, totalCost, costPerKg: totalCost/totalWeight, absError, maxError, score};
+        if(!best || candidate.score < best.score) best = candidate;
+      });
+      return best;
+    }
+
+    function solveLeastSquares(sub,b){
+      const m = sub.length;
+      const A = sub.map(f => [f.n/100,f.p/100,f.k/100]);
+      const ATA = Array.from({length:m}, () => Array(m).fill(0));
+      const ATb = Array(m).fill(0);
+      for(let i=0;i<m;i++){
+        for(let j=0;j<m;j++) ATA[i][j] = A[i][0]*A[j][0] + A[i][1]*A[j][1] + A[i][2]*A[j][2];
+        ATb[i] = A[i][0]*b[0] + A[i][1]*b[1] + A[i][2]*b[2];
+      }
+      return solveLinear(ATA,ATb);
+    }
+
+    function solveLinear(A,b){
+      const n = b.length;
+      const M = A.map((row,i) => [...row,b[i]]);
+      for(let i=0;i<n;i++){
+        let maxRow = i;
+        for(let r=i+1;r<n;r++) if(Math.abs(M[r][i]) > Math.abs(M[maxRow][i])) maxRow = r;
+        if(Math.abs(M[maxRow][i]) < 1e-10) return null;
+        [M[i],M[maxRow]] = [M[maxRow],M[i]];
+        const pivot = M[i][i];
+        for(let c=i;c<=n;c++) M[i][c] /= pivot;
+        for(let r=0;r<n;r++){
+          if(r===i) continue;
+          const factor = M[r][i];
+          for(let c=i;c<=n;c++) M[r][c] -= factor*M[i][c];
+        }
+      }
+      return M.map(row => row[n]);
+    }
+
+    function buildSubsets(arr,maxSize){
+      const out = [];
+      function walk(start,combo){
+        if(combo.length>0) out.push([...combo]);
+        if(combo.length===maxSize) return;
+        for(let i=start;i<arr.length;i++){
+          combo.push(arr[i]);
+          walk(i+1,combo);
+          combo.pop();
+        }
+      }
+      walk(0,[]);
+      return out;
+    }
+
+    function renderCalculationResult(res){
+      const quality = res.maxError <= 0.35 ? ['แม่นยำสูง','text-emerald-700','bg-emerald-50'] : res.maxError <= 1.5 ? ['ใกล้เคียง','text-amber-700','bg-amber-50'] : ['คลาดเคลื่อนสูง','text-red-700','bg-red-50'];
+      document.getElementById('calc-result-area').innerHTML = `
+        <div class="space-y-4 w-full text-left">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="${quality[2]} rounded-3xl p-4"><p class="text-xs ${quality[1]} font-bold">สถานะสูตร</p><strong class="text-xl ${quality[1]}">${quality[0]}</strong></div>
+            <div class="bg-sky-50 rounded-3xl p-4"><p class="text-xs text-sky-700 font-bold">สูตรจริง</p><strong class="text-xl text-sky-800">${escapeHTML(res.realNPK)}</strong></div>
+            <div class="bg-rose-50 rounded-3xl p-4"><p class="text-xs text-rose-700 font-bold">ต้นทุนรวม</p><strong class="text-xl text-rose-800">${money(res.totalCost)} บ.</strong></div>
+          </div>
+          <div class="overflow-x-auto rounded-3xl border border-slate-100">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500"><tr><th class="text-left p-3">วัตถุดิบ</th><th class="text-right p-3">กิโลกรัม</th><th class="text-right p-3">ต้นทุน</th></tr></thead>
+              <tbody>
+                ${res.items.map(i => `<tr class="border-t border-slate-100"><td class="p-3"><strong>${escapeHTML(i.name)}</strong><br><small class="text-slate-400">${num(i.n)}-${num(i.p)}-${num(i.k)}</small></td><td class="p-3 text-right font-extrabold text-emerald-700">${num(i.weight)}</td><td class="p-3 text-right text-rose-700 font-bold">${money(i.cost)}</td></tr>`).join('')}
+                ${res.filler > 0 ? `<tr class="border-t border-slate-100 bg-slate-50"><td class="p-3"><strong>สารเติมเต็ม</strong><br><small class="text-slate-400">เช่น ดินละเอียด แกลบดำ หรือวัสดุเฉื่อยตามความเหมาะสม</small></td><td class="p-3 text-right font-extrabold text-slate-600">${num(res.filler)}</td><td class="p-3 text-right text-slate-400">-</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+            <div class="rounded-3xl bg-white border border-slate-100 p-4"><p class="text-xs text-slate-500">เป้าหมาย</p><strong class="text-lg">${escapeHTML(res.targetNPK)}</strong></div>
+            <div class="rounded-3xl bg-white border border-slate-100 p-4"><p class="text-xs text-slate-500">เฉลี่ย/กก.</p><strong class="text-lg text-rose-700">${money(res.costPerKg)} บ.</strong></div>
+            <div class="rounded-3xl bg-white border border-slate-100 p-4"><p class="text-xs text-slate-500">คลาดเคลื่อนสูงสุด</p><strong class="text-lg ${quality[1]}">${num(res.maxError)}%</strong></div>
+          </div>
+          <button id="save-current-result" class="no-print w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3 rounded-2xl"><i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกประวัติ</button>
+        </div>`;
+      document.getElementById('save-current-result')?.addEventListener('click', saveCurrentResult);
+    }
+
+    function saveCurrentResult(){
+      if(!cacheResult) return toast('ยังไม่มีผลลัพธ์ให้บันทึก','error');
+      historyLogs.unshift(cloneData(cacheResult));
+      saveJSON(STORAGE_HISTORY, historyLogs);
+      renderAll();
+      toast('บันทึกประวัติเรียบร้อย');
+    }
+
+    function openFertModal(id = null){
+      const modal = document.getElementById('fert-modal');
+      document.getElementById('fert-edit-id').value = id || '';
+      const f = fertilizers.find(x => x.id === id);
+      document.getElementById('modal-title').textContent = f ? 'แก้ไขแม่ปุ๋ย' : 'เพิ่มแม่ปุ๋ยใหม่';
+      document.getElementById('m-name').value = f ? f.name : '';
+      document.getElementById('m-n').value = f ? f.n : 0;
+      document.getElementById('m-p').value = f ? f.p : 0;
+      document.getElementById('m-k').value = f ? f.k : 0;
+      document.getElementById('m-price').value = f ? f.price : 0;
+      modal.classList.add('show');
+    }
+
+    function closeFertModal(){
+      document.getElementById('fert-modal')?.classList.remove('show');
+    }
+
+    function saveFertilizerFromModal(){
+      const id = document.getElementById('fert-edit-id').value;
+      const data = {id:id || uid(), name:document.getElementById('m-name').value.trim(), n:safeNumber(document.getElementById('m-n').value), p:safeNumber(document.getElementById('m-p').value), k:safeNumber(document.getElementById('m-k').value), price:safeNumber(document.getElementById('m-price').value)};
+      if(!data.name) return toast('กรุณาระบุชื่อแม่ปุ๋ย','error');
+      if(data.n+data.p+data.k <= 0) return toast('กรุณาระบุค่า N-P-K อย่างน้อย 1 ค่า','error');
+      if(id) fertilizers = fertilizers.map(f => f.id===id ? data : f);
+      else fertilizers.push(data);
+      saveJSON(STORAGE_FERT, fertilizers);
+      closeFertModal();
+      renderAll();
+      toast('บันทึกแม่ปุ๋ยเรียบร้อย');
+    }
+
+    function deleteFertilizer(id){
+      if(!confirm('ยืนยันการลบแม่ปุ๋ยรายการนี้?')) return;
+      fertilizers = fertilizers.filter(f => f.id !== id);
+      saveJSON(STORAGE_FERT, fertilizers);
+      renderAll();
+      toast('ลบข้อมูลแล้ว');
+    }
+
+    function restoreDefaults(){
+      if(!confirm('ต้องการคืนค่าฐานข้อมูลแม่ปุ๋ยเริ่มต้นหรือไม่? ข้อมูลเดิมจะถูกแทนที่')) return;
+      fertilizers = cloneData(defaultFertilizers).map(f => ({...f,id:uid()}));
+      saveJSON(STORAGE_FERT, fertilizers);
+      renderAll();
+      toast('คืนค่าเริ่มต้นเรียบร้อย');
+    }
+
+    function deleteHistory(id){
+      historyLogs = historyLogs.filter(h => h.id !== id);
+      saveJSON(STORAGE_HISTORY, historyLogs);
+      renderAll();
+      toast('ลบประวัติแล้ว');
+    }
+
+    function clearHistory(){
+      if(!historyLogs.length) return toast('ยังไม่มีประวัติ','error');
+      if(!confirm('ยืนยันการล้างประวัติทั้งหมด?')) return;
+      historyLogs = [];
+      saveJSON(STORAGE_HISTORY, historyLogs);
+      renderAll();
+      toast('ล้างประวัติเรียบร้อย');
+    }
+
+    function resetCalculator(){
+      document.getElementById('calc-n').value = 15;
+      document.getElementById('calc-p').value = 15;
+      document.getElementById('calc-k').value = 15;
+      document.getElementById('calc-weight').value = 100;
+      cacheResult = null;
+      renderCalculatorFertilizers();
+      document.getElementById('calc-result-area').innerHTML = '<div class="h-full flex items-center justify-center text-center text-slate-400 py-14"><div><i class="fa-solid fa-flask text-5xl text-emerald-200 mb-4"></i><p class="font-bold">กรอกข้อมูลแล้วกดเริ่มคำนวณสูตร</p><p class="text-sm mt-1">ผลลัพธ์จะแสดงปริมาณวัตถุดิบ ต้นทุน และสูตรจริง</p></div></div>';
+    }
+
+    function toggleAllFertilizers(checked){
+      document.querySelectorAll('.fert-check').forEach(cb => {
+        cb.checked = checked;
+        cb.closest('.chip')?.classList.toggle('checked', checked);
+      });
+    }
+
+    async function shareCurrentResult(){
+      if(!cacheResult) return toast('ยังไม่มีผลลัพธ์ให้แชร์','error');
+      await shareText(makeShareText(cacheResult));
+    }
+
+    async function shareHistory(id){
+      const h = historyLogs.find(x => x.id === id);
+      if(h) await shareText(makeShareText(h));
+    }
+
+    function makeShareText(r){
+      const lines = [
+        'ระบบผสมปุ๋ยใช้เอง',
+        `สูตรเป้าหมาย ${r.targetNPK} น้ำหนัก ${num(r.totalWeight)} กก.`,
+        `สูตรจริง ${r.realNPK}`,
+        `ต้นทุนรวม ${money(r.totalCost)} บาท (${money(r.costPerKg)} บาท/กก.)`,
+        'ส่วนผสม:',
+        ...r.items.map(i => `- ${i.name}: ${num(i.weight)} กก.`)
+      ];
+      if(r.filler > 0) lines.push(`- สารเติมเต็ม: ${num(r.filler)} กก.`);
+      return lines.join('\n');
+    }
+
+    async function shareText(text){
+      try{
+        if(navigator.share){
+          await navigator.share({title:'Smart Fertilizer Mix', text});
+          return;
+        }
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+        }else{
+          fallbackCopy(text);
+        }
+        toast('คัดลอกข้อความสำหรับแชร์แล้ว');
+      }catch(e){
+        fallbackCopy(text);
+        toast('คัดลอกข้อความสำหรับแชร์แล้ว');
+      }
+    }
+
+    function fallbackCopy(text){
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    function makeFertilizer(name,n,p,k,price){
+      return {id:uid(), name, n, p, k, price};
+    }
+
+    function loadJSON(key,fallback){
+      try{
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      }catch(e){
+        console.warn('Cannot load localStorage', key, e);
+        return fallback;
+      }
+    }
+
+    function saveJSON(key,value){
+      try{ localStorage.setItem(key, JSON.stringify(value)); }
+      catch(e){ console.warn('Cannot save localStorage', key, e); }
+    }
+
+    function cloneData(value){
+      if(typeof structuredClone === 'function') return structuredClone(value);
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function safeNumber(value,fallback=0){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function uid(){
+      return 'id-' + Math.random().toString(36).slice(2,10) + '-' + Date.now().toString(36);
+    }
+
+    function num(v){
+      const n = safeNumber(v,0);
+      return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.00$/,'');
+    }
+
+    function money(v){
+      return safeNumber(v,0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    function setText(id,value){
+      const el = document.getElementById(id);
+      if(el) el.textContent = value;
+    }
+
+    function toast(msg,type='success'){
+      const t = document.getElementById('toast');
+      if(!t) return;
+      t.textContent = msg;
+      t.className = `toast ${type==='error'?'bg-red-600':'bg-emerald-600'} show`;
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => t.classList.remove('show'),2800);
+    }
+
+    function escapeHTML(str){
+      return String(str).replace(/[&<>'"]/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function escapeAttr(str){
+      return escapeHTML(str);
+    }
+
+    function runSelfTests(){
+      try{
+        console.assert(typeof window.showPage === 'function','TEST: showPage must be global');
+        console.assert(Array.isArray(buildSubsets([1,2,3],2)),'TEST: buildSubsets returns an array');
+        console.assert(buildSubsets([1,2,3],2).length === 6,'TEST: buildSubsets count for max size 2');
+        const exactFerts = [
+          {id:'a',name:'N',n:10,p:0,k:0,price:1},
+          {id:'b',name:'P',n:0,p:10,k:0,price:1},
+          {id:'c',name:'K',n:0,p:0,k:10,price:1}
+        ];
+        const result = calculateBestMix(1,1,1,100,exactFerts);
+        console.assert(result && Math.abs(result.realNPK.split('-').map(Number)[0]-1) < 0.01,'TEST: calculateBestMix solves N');
+        console.assert(makeShareText({targetNPK:'1-1-1',totalWeight:100,realNPK:'1-1-1',totalCost:10,costPerKg:.1,items:[{name:'N',weight:10}],filler:0}).includes('\n- N'),'TEST: makeShareText contains newline list');
+      }catch(e){
+        console.warn('Self test warning:', e);
+      }
+    }
+  </script>
+</body>
+</html>
